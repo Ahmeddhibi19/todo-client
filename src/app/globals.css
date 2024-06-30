@@ -1,8 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-:root {
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+/*:root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
@@ -30,4 +30,95 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+}*/
+.roboto-regular {
+  font-family: "Roboto", sans-serif;
+  font-weight: 900;
+  font-style: normal;
+}
+.roboto-medium {
+  font-family: "Roboto", sans-serif;
+  font-weight: 600;
+  font-style: normal;
+}
+.roboto-fine {
+  font-family: "Roboto", sans-serif;
+  font-weight: 200;
+  font-style: normal;
+}
+/* Custom scrollbar styles for Webkit browsers (Chrome, Safari) */
+::-webkit-scrollbar {
+  width: 12px; /* Width of the scrollbar */
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Track color */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888; /* Scrollbar thumb color */
+  border-radius: 10px; /* Rounded corners */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555; /* Scrollbar thumb color on hover */
+}
+
+/* Custom scrollbar styles for Firefox */
+* {
+  scrollbar-width: thin; /* Width of the scrollbar */
+  scrollbar-color: #888 #f1f1f1; /* Scrollbar thumb and track color */
+}
+
+/* Custom scrollbar styles for Microsoft Edge */
+::-ms-scrollbar {
+  width: 12px; /* Width of the scrollbar */
+}
+
+::-ms-scrollbar-track {
+  background: #f1f1f1; /* Track color */
+}
+
+::-ms-scrollbar-thumb {
+  background: #888; /* Scrollbar thumb color */
+  border-radius: 10px; /* Rounded corners */
+}
+
+::-ms-scrollbar-thumb:hover {
+  background: #555; /* Scrollbar thumb color on hover */
+}
+/* styles/globals.css or styles/SideBar.module.css */
+
+.sidebar {
+  width: 250px;
+  height: 100vh;
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  /*padding: 20px;*/
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  background-color: #f8f8f8;
+  overflow-y: auto;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 12px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.sidebar {
+  scrollbar-width: thin;
+  scrollbar-color: #888 #f1f1f1;
 }
