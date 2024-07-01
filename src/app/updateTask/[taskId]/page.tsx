@@ -1,9 +1,9 @@
 import UpdateTask from '@/components/updateTask'
 import React from 'react'
 
-const page = ({params}:{params:{taskId:number}}) => {
+const page = ({params}:{params:{taskId:string}}) => {
   return (
-    <UpdateTask taskid={params.taskId}/>
+    <UpdateTask taskId={params.taskId}/>
   )
 }
 

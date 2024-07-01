@@ -1,7 +1,7 @@
 "use client"
-import Link from "next/link";
-import { useDispatch } from "react-redux";
-///import { Project } from "../types"; // Define Project type as needed
+import React, {  useState,CSSProperties  } from 'react';
+import Spinner from './spinner';
+
 interface Project{
     id:number;
     name:string;
@@ -10,9 +10,11 @@ interface SideBarProps {
   projects: Project[];
   clickedProjectId: number | null;
   onProjectClick: (id: number) => void;
+  loading:boolean
 }
 
-const SideBar = ({ projects, clickedProjectId, onProjectClick }: SideBarProps) => {
+const SideBar = ({ projects, clickedProjectId, onProjectClick,loading }: SideBarProps) => {
+  let [color, setColor] = useState("#ffffff");
   //const dispatch = useDispatch();
 
   const handleClick = (id: number) => {
@@ -24,21 +26,28 @@ const SideBar = ({ projects, clickedProjectId, onProjectClick }: SideBarProps) =
       <span className="text-[35px] roboto-regular mb-10 text-center">
         All Projects
       </span>
-      <ul>
-        {projects.map((project) => (
-          
-            <li key={project.id}
-            className={`text-[20px] w-[250px] h-[50px] roboto-medium my-2 flex justify-center items-center hover:bg-hover_button hover:text-white cursor-pointer transition ${
-              project.id === clickedProjectId ? "bg-hover_button text-white" : "text-black"
-            }`}
-            onClick={() => handleClick(project.id)}
-          >
-            {project.name}
-          </li>
-          
-          
-        ))}
-      </ul>
+      {
+        loading?(
+    <Spinner />
+        ):(
+          <ul>
+          {projects.map((project) => (
+            
+              <li key={project.id}
+              className={`text-[20px] w-[250px] h-[50px] roboto-medium my-2 flex justify-center items-center hover:bg-hover_button hover:text-white cursor-pointer transition ${
+                project.id === clickedProjectId ? "bg-hover_button text-white" : "text-black"
+              }`}
+              onClick={() => handleClick(project.id)}
+            >
+              {project.name}
+            </li>
+            
+            
+          ))}
+        </ul>
+        )
+      }
+      
     </div>
   );
 };

@@ -1,8 +1,13 @@
+"use client"
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState, AppDispatch } from '../redux/store';
 import Link from 'next/link';
-import React, { useState, FormEvent } from 'react';
 import { FaArrowLeft } from 'react-icons/fa';
-import { useMutation, gql } from '@apollo/client';
-import { CREATE_PROJECT } from '@/apollo/requests';
+import Spinner from './spinner';
+import PopUp from './popUp';
+import { createProject } from '@/redux/projectReducer';
+
 
 interface Project {
   name: string;
@@ -12,33 +17,52 @@ interface Project {
 
 
 const AddProject: React.FC = () => {
+  const dispatch: AppDispatch = useDispatch();
+  const condition = useSelector((state: RootState) => state.project.state);
+  const error = useSelector((state: RootState) => state.project.error);
   const [projectName, setProjectName] = useState<string>('');
   const [projectDescription, setProjectDescription] = useState<string>('');
+  const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
 
-  const [createProject, { loading, error }] = useMutation(CREATE_PROJECT);
 
-  const handleSubmit = async (event: FormEvent) => {
+
+  const handleSubmit = async (event:React.FormEvent) => {
     event.preventDefault();
 
-    try {
-      const { data } = await createProject({
-        variables: {
-          input: {
-            name: projectName,
-            description: projectDescription,
-          },
-        },
-      });
-
-      console.log('Created Project:', data.createProject);
-
-      // Clear the form fields after successful creation
-      setProjectName('');
-      setProjectDescription('');
-    } catch (error) {
-      console.error('Failed to create project:', error);
+   const newProject:Project={
+    name: projectName,
+    description: projectDescription,
+   }
+   dispatch(createProject(newProject)).then((result) => {
+    if (createProject.fulfilled.match(result)) {
+      setNotification({ message: 'Project created successfully!', type: 'success' });
+    } else if (createProject.rejected.match(result)) {
+      setNotification({ message: `Error: ${result.payload}`, type: 'error' });
     }
+  })
+  .then(res=>{
+    setProjectDescription('')
+    setProjectName('')
+  })
   };
+
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => setNotification(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
+
+  if (condition === 'loading') {
+    return (
+     <Spinner />
+    );
+  }
+
+  if (condition === 'failed') {
+    return <p>Error: {error}</p>;
+  }
+
 
   return (
     <div className="max-w-md mx-auto mt-10">
@@ -49,6 +73,10 @@ const AddProject: React.FC = () => {
         <h2 className="text-2xl font-bold mb-4">Add New Project</h2>
 
         </div>
+        {notification && (
+         <PopUp message={notification.message} type={notification.type} />
+
+      )}
       <form onSubmit={handleSubmit} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
         <div className="mb-4">
           <label htmlFor="projectName" className="block text-gray-700 text-sm font-bold mb-2">
@@ -76,15 +104,13 @@ const AddProject: React.FC = () => {
           ></textarea>
         </div>
         <div className="flex items-center justify-between">
-          <button
+        <button
             type="submit"
             className="bg-blue-900 hover:bg-hover_button text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-            disabled={loading}
           >
-            {loading ? 'Adding Project...' : 'Add Project'}
+            Add Project
           </button>
         </div>
-        {error && <p className="text-red-500 mt-2">Error: {error.message}</p>}
       </form>
     </div>
   );

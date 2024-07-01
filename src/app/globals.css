@@ -46,48 +46,44 @@ body {
   font-weight: 200;
   font-style: normal;
 }
-/* Custom scrollbar styles for Webkit browsers (Chrome, Safari) */
 ::-webkit-scrollbar {
-  width: 12px; /* Width of the scrollbar */
+  width: 12px; 
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1; /* Track color */
+  background: #f1f1f1;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #888; /* Scrollbar thumb color */
-  border-radius: 10px; /* Rounded corners */
+  background: #888; 
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555; /* Scrollbar thumb color on hover */
+  background: #555; 
 }
 
-/* Custom scrollbar styles for Firefox */
 * {
-  scrollbar-width: thin; /* Width of the scrollbar */
-  scrollbar-color: #888 #f1f1f1; /* Scrollbar thumb and track color */
+  scrollbar-width: thin; 
+  scrollbar-color: #888 #f1f1f1; 
 }
 
-/* Custom scrollbar styles for Microsoft Edge */
 ::-ms-scrollbar {
-  width: 12px; /* Width of the scrollbar */
+  width: 12px; 
 }
 
 ::-ms-scrollbar-track {
-  background: #f1f1f1; /* Track color */
+  background: #f1f1f1; 
 }
 
 ::-ms-scrollbar-thumb {
-  background: #888; /* Scrollbar thumb color */
-  border-radius: 10px; /* Rounded corners */
+  background: #888; 
+  border-radius: 10px; 
 }
 
 ::-ms-scrollbar-thumb:hover {
-  background: #555; /* Scrollbar thumb color on hover */
+  background: #555; 
 }
-/* styles/globals.css or styles/SideBar.module.css */
 
 .sidebar {
   width: 250px;
@@ -95,7 +91,6 @@ body {
   position: fixed;
   display: flex;
   flex-direction: column;
-  /*padding: 20px;*/
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
   background-color: #f8f8f8;
   overflow-y: auto;
@@ -122,3 +117,32 @@ body {
   scrollbar-width: thin;
   scrollbar-color: #888 #f1f1f1;
 }
+
+.notif{
+  animation: slideInRight 0.5s forwards;
+  }
+    .progress-bar {
+      height: 4px;
+      width: 100%;
+      background: white;
+      position: relative;
+      
+      overflow: hidden;
+    }
+
+    @keyframes progress-animation {
+      0% {
+        left: 0;
+      }
+      100% {
+        left: 100%;
+      }
+    }
+     @keyframes slideInRight {
+      0% {
+        transform: translateX(100%);
+      }
+      100% {
+        transform: translateX(0);
+      }
+    }

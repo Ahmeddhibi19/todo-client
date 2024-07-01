@@ -1,8 +1,7 @@
-"use client"
 import AddTask from '@/components/addTask'
 import React from 'react'
 
-const page = ({params}:{params:{projectid:number}}) => {
+const page = ({params}:{params:{projectid:string}}) => {
   return (
     <AddTask projectid={params.projectid}/>
   )

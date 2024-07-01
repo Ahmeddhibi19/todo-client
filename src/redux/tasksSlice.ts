@@ -1,15 +1,18 @@
 "use client";
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import client from '@/apollo/apolloClient';
+import { GET_TASKS_BY_PROJECT_ID,GET_TASK,UPDATE_TASK,CREATE_TASK } from '@/apollo/requests';
 
-type State = "done" | "doing" | "to-do";
+type State = "done" | "doing" | "to do";
 
 export interface TaskType {
-id:number
+  id?:number
   title: string;
   description?: string;
   status: State;
-  startdate: Date;
-  dueDate: Date;
+  startDate: string;
+  dueDate: string;
+  projectId:number|undefined
 }
 
 interface AppState {
@@ -19,83 +22,82 @@ interface AppState {
     statusCondition: State;
     monthCondition: string;
     clickedProjectId: number | null; // New state for clicked project ID
+    state: 'idle' | 'loading' | 'succeeded' | 'failed';
+  error: string | null;
   }
   
 
 const initialState: AppState = {
-  tasks: [
-    {
-        id:1,
-      title: 'Task 1',
-      description: 'Description 1',
-      status: 'to-do',
-      startdate: new Date(),
-      dueDate: new Date("2024-11-19")
-    },
-    {
-        id:2,
-      title: 'Task 2',
-      description: 'Description 2',
-      status: 'doing',
-      startdate: new Date(),
-      dueDate: new Date("2024-10-19")
-    },
-    {
-        id:3,
-      title: 'Task 3',
-      description: 'Description 3',
-      status: 'done',
-      startdate: new Date(),
-      dueDate: new Date("2024-09-19")
-    },
-    {
-        id:4,
-        title: 'Task 3',
-        description: 'Description 3',
-        status: 'doing',
-        startdate: new Date(),
-        dueDate: new Date("2024-09-19")
-      },
-      {
-        id:5,
-        title: 'Task 3',
-        description: 'Description 3',
-        status: 'to-do',
-        startdate: new Date(),
-        dueDate: new Date("2024-09-19")
-      },
-      {
-        id:6,
-        title: 'Task 3',
-        description: 'Description 3',
-        status: 'done',
-        startdate: new Date(),
-        dueDate: new Date("2024-09-19")
-      },
-      {
-        id:7,
-        title: 'Task 3',
-        description: 'Description 3',
-        status: 'to-do',
-        startdate: new Date(),
-        dueDate: new Date("2024-09-19")
-      },
-      {
-        id:8,
-        title: 'Task 3',
-        description: 'Description 3',
-        status: 'doing',
-        startdate: new Date(),
-        dueDate: new Date("2024-09-19")
-      },
-    // Add more tasks as needed...
-  ],
-  condition: '',
-  statusCondition: 'to-do',
+  tasks: [],
+  condition: 'status',
+  statusCondition: 'to do',
   monthCondition: '',
   clickedProjectId: 0,
-  task:null
+  task:null,
+  state: 'idle',
+  error: null,
 };
+export const fetchTasksByProjectId = createAsyncThunk(
+  'tasks/fetchTasksByProjectId',
+  async (projectId: number) => {
+    const { data } = await client.query({
+      query: GET_TASKS_BY_PROJECT_ID,
+      variables: { projectId },
+    });
+    return data.getTasksByProjectId;
+  }
+);
+
+export const fetchTaskById = createAsyncThunk(
+  'tasks/fetchTaskById',
+  async (taskId: number) => {
+    const { data } = await client.query({
+      query: GET_TASK,
+      variables: { id: taskId },
+    });
+    return data.getTask;
+  }
+);
+export const updateTask = createAsyncThunk(
+  'tasks/updateTask',
+  async (task: TaskType, { rejectWithValue }) => {
+    try {
+      const response = await client.mutate({
+        mutation: UPDATE_TASK,
+        variables: {
+          id: task.id,
+          input: {
+            title: task.title,
+            description: task.description,
+            status: task.status,
+            dueDate: task.dueDate,
+            startDate: task.startDate,
+            projectId: task.projectId
+          },
+        },
+      });
+      return response.data.updateTask;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  }
+);
+
+export const createTask = createAsyncThunk(
+  'tasks/createTask',
+  async (taskInput: TaskType, { rejectWithValue }) => {
+    try {
+      const response = await client.mutate({
+        mutation: CREATE_TASK,
+        variables: { input: taskInput },
+      });
+      return response.data.createTask;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  }
+);
+
 
 const tasksSlice = createSlice({
   name: 'tasks',
@@ -116,12 +118,56 @@ const tasksSlice = createSlice({
       setTask(state,action:PayloadAction<TaskType>){
         state.task=action.payload
       },
-      updateTask(state,action:PayloadAction<TaskType>){
-        state.task=action.payload
-      }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchTasksByProjectId.pending, (state) => {
+        state.state = 'loading';
+      })
+      .addCase(fetchTasksByProjectId.fulfilled, (state, action) => {
+        state.state = 'succeeded';
+        state.tasks = action.payload;
+      })
+      .addCase(fetchTasksByProjectId.rejected, (state, action) => {
+        state.state = 'failed';
+        state.error = action.error.message || null;
+      })
+      .addCase(fetchTaskById.pending, (state) => {
+        state.state = 'loading';
+      })
+      .addCase(fetchTaskById.fulfilled, (state, action) => {
+        state.state = 'succeeded';
+        state.task = action.payload;
+      })
+      .addCase(fetchTaskById.rejected, (state, action) => {
+        state.state = 'failed';
+        state.error = action.error.message || null;
+      })
+      .addCase(updateTask.pending, (state) => {
+        state.state = 'loading';
+      })
+      .addCase(updateTask.fulfilled, (state, action) => {
+        state.state = 'succeeded';
+        state.task = action.payload;
+      })
+      .addCase(updateTask.rejected, (state, action) => {
+        state.state = 'failed';
+        state.error = action.error.message || null;
+      })
+      .addCase(createTask.pending, (state) => {
+        state.state = 'loading';
+      })
+      .addCase(createTask.fulfilled, (state, action) => {
+        state.state = 'succeeded';
+        state.task = action.payload;
+      })
+      .addCase(createTask.rejected, (state, action) => {
+        state.state = 'failed';
+        state.error = action.error.message || null;
+      });
   },
 });
 
 
-export const { setCondition, setStatusCondition, setMonthCondition, setClickedProjectId, updateTask ,setTask } = tasksSlice.actions;
+export const { setCondition, setStatusCondition, setMonthCondition, setClickedProjectId ,setTask } = tasksSlice.actions;
 export default tasksSlice;

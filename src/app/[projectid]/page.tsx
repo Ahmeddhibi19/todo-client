@@ -1,42 +1,63 @@
 "use client";
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/redux/store';
-import { setCondition } from '@/redux/tasksSlice';
+import { setCondition, fetchTasksByProjectId } from '@/redux/tasksSlice';
 import Task from '@/components/task';
 import Link from 'next/link';
 import { FaArrowLeft } from 'react-icons/fa';
 
-type State = "done" | "doing" | "to-do";
+type State = "done" | "doing" | "to do";
 
 interface TaskType {
-  id:number
+  id?: number;
   title: string;
   description?: string;
   status: State;
-  startdate: Date;
-  dueDate: Date;
+  startDate: string;
+  dueDate: string;
 }
 
-const Page = ({ params }: { params: { projectid: number } }) => {
+const Page = ({ params }: { params: { projectid: string } }) => {
   const dispatch: AppDispatch = useDispatch();
   const tasks = useSelector((state: RootState) => state.tasks.tasks);
   const condition = useSelector((state: RootState) => state.tasks.condition);
+  const status = useSelector((state: RootState) => state.tasks.state);
+  const error = useSelector((state: RootState) => state.tasks.error);
+
+  useEffect(() => {
+    const projectId = parseInt(params.projectid);
+    if (!isNaN(projectId)) {
+      dispatch(fetchTasksByProjectId(projectId));
+    }
+  }, [dispatch, params.projectid]);
+
+  if (status === 'loading') {
+    return <p>Loading...</p>;
+  }
+
+  if (status === 'failed') {
+    return <p>Error: {error}</p>;
+  }
 
   const currentMonthIndex = new Date().getMonth();
-  const months = Array.from({ length: 12 }, (e, i) => new Date(0, i).toLocaleString('en-US', { month: 'long' })).slice(currentMonthIndex);
+  const months = Array.from({ length: 12 }, (_, i) => new Date(0, i).toLocaleString('en-US', { month: 'long' })).slice(currentMonthIndex);
 
   const tasksByMonth = months.reduce((acc, month) => {
-    acc[month] = tasks.filter(task => task.dueDate.toLocaleString('en-US', { month: 'long' }) === month).length;
+    acc[month] = tasks.filter(task => {
+      const dueDate = new Date(Number(task.dueDate));
+      return dueDate.toLocaleString('en-US', { month: 'long' }) === month;
+    }).length;
     return acc;
   }, {} as { [key: string]: number });
 
   const filteredTasks = tasks.filter(task => {
+    const dueDate = new Date(Number(task.dueDate));
     if (condition === 'status') {
       return true;
     } else if (condition.includes('status-')) {
       const month = condition.split('-')[1];
-      return task.dueDate.toLocaleString('en-US', { month: 'long' }) === month;
+      return dueDate.toLocaleString('en-US', { month: 'long' }) === month;
     }
     return false;
   });
@@ -45,7 +66,7 @@ const Page = ({ params }: { params: { projectid: number } }) => {
     acc[task.status] = acc[task.status] || [];
     acc[task.status].push(task);
     return acc;
-  }, { "to-do": [], "doing": [], "done": [] });
+  }, { "to do": [], "doing": [], "done": [] });
 
   const renderSummaryLine = () => {
     if (condition === 'status') {
@@ -99,7 +120,6 @@ const Page = ({ params }: { params: { projectid: number } }) => {
             +
           </div>
         </Link>
-
       </div>
 
       {renderSummaryLine()}
@@ -107,13 +127,12 @@ const Page = ({ params }: { params: { projectid: number } }) => {
       {condition === 'status' && (
         <div className="w-full h-auto grid grid-cols-3 gap-4 mb-4">
           {(Object.keys(groupedTasks) as State[]).map(status => (
-            <div key={status} className="flex flex-col items-start">
+            <div key={status} className="flex flex-col items-start bg-todo p-3 rounded-lg">
               <h2 className="text-xl font-bold mb-2">{status.toUpperCase()} ({groupedTasks[status].length})</h2>
               {groupedTasks[status].map((task, index) => (
-                <Link href={`/updateTask/${task.id}`}>
-                <Task key={index} task={task} />
+                <Link href={`/updateTask/${task.id}`} key={index}>
+                  <Task task={task} />
                 </Link>
-                
               ))}
             </div>
           ))}
@@ -123,12 +142,12 @@ const Page = ({ params }: { params: { projectid: number } }) => {
       {condition.includes('status-') && (
         <div className="w-full h-auto grid grid-cols-3 gap-4 mb-4">
           {(Object.keys(groupedTasks) as State[]).map(status => (
-            <div key={status} className="flex flex-col items-start">
+            <div key={status} className="flex flex-col items-start bg-todo p-3 rounded-lg">
               <h2 className="text-xl font-bold mb-2">{status.toUpperCase()} ({groupedTasks[status].length})</h2>
               {groupedTasks[status].map((task, index) => (
-                  <Link href={`/updateTask/${task.id}`}>
-                  <Task key={index} task={task} />
-                  </Link>
+                <Link href={`/updateTask/${task.id}`} key={index}>
+                  <Task task={task} />
+                </Link>
               ))}
             </div>
           ))}

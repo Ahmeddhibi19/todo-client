@@ -5,7 +5,7 @@ import { Provider } from 'react-redux';
 import  store  from '@/redux/store';
 import UpdateProject from '@/components/updateProject';
 
-const Page = ({params}:{params:{projectId:number}}) => {
+const Page = ({params}:{params:{projectId:string}}) => {
   //const { projectid } = params.projectId
 
 //  if (!projectid) return null;
